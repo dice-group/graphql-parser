@@ -1,10 +1,6 @@
 #include <gtest/gtest.h>
 
-
-#include <Dice/graphql-parser/internal/QueryVisitor.hpp>
-#include <Dice/graphql-parser/internal/ResponseVisitor.hpp>
-#include <Dice/graphql-parser/internal/SchemaVisitor.hpp>
-#include <Dice/parser.hpp>
+#include "TestSchemaParsing.cpp"
 
 int main(int argc, char **argv) {
     testing::InitGoogleTest(&argc, argv);
