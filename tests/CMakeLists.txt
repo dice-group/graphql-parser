@@ -1,4 +1,3 @@
-
 include(FetchContent)
 FetchContent_Declare(
         googletest
@@ -17,8 +16,6 @@ include(GoogleTest)
 
 include(${CMAKE_BINARY_DIR}/conan_paths.cmake)
 
-
-#find_package(graphql-parser REQUIRED)
 
 # add the executable for all tests
 add_executable(tests Tests.cpp)

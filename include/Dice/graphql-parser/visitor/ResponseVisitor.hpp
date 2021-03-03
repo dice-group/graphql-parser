@@ -1,7 +1,3 @@
-//
-// Created by fakhr on 26.02.21.
-//
-
 #ifndef GRAPHQL_PARSER_RESPONSEVISITOR_HPP
 #define GRAPHQL_PARSER_RESPONSEVISITOR_HPP
 

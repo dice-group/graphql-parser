@@ -2,13 +2,13 @@ import re, os
 from conans.tools import load
 from conans import ConanFile, CMake, tools
 
-class grahpQLParserBase(ConanFile):
+class GraphqlParser(ConanFile):
     name = "graphql-parser"
     author = "DICE Group <info@dice-research.org>"
-    # homepage = "https://github.com/dice-group/sparql-parser"
-    # url = homepage
+    homepage = "https://github.com/dice-group/graphql-parser"
+    url = homepage
     license = "AGPL"
-    topics = "GRAPHQL", "parser"
+    topics = "GraphQL", "parser"
     settings = "os", "compiler", "build_type", "arch"
     requires=(
         "graphql-parser-base/0.1.0@dice-group/rc1",
@@ -20,7 +20,8 @@ class grahpQLParserBase(ConanFile):
     exports_sources = (
         "CMakeLists.txt",
         "cmake/*",
-         "include/*")
+        "include/*",
+        "src/*")
     no_copy_source = True
 
     def __init__(self, *args, **kwargs):
@@ -42,6 +43,9 @@ class grahpQLParserBase(ConanFile):
             cmake.definitions["GRAPHQL_PARSER_BUILD_TESTS"] = "ON"
         cmake.configure()
         cmake.install()
+
+    # def package_info(self):
+    #     self.cpp_info.libs = ["graphql-parser"]
 
     def package_id(self):
         self.info.header_only()

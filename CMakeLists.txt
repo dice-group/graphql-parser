@@ -14,18 +14,31 @@ find_package(graphql-parser-base REQUIRED)
 set(graphql-parser_INSTALL_INCLUDE_DIR "include" CACHE STRING "The installation include directory")
 set(graphql-parser_INSTALL_CMAKE_DIR "share/graphql-parser/cmake" CACHE STRING "The installation cmake directory")
 
+# define a static library
+#add_library(graphql-parser STATIC
+#        ${CMAKE_CURRENT_SOURCE_DIR}/src/Dice/graphql-parser/GraphQLParser.cpp)
+
 # define a header-only library
 add_library(graphql-parser INTERFACE)
 add_library(graphql-parser::graphql-parser ALIAS graphql-parser)
 
 target_include_directories(graphql-parser INTERFACE
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-        $<INSTALL_INTERFACE:${graphql-parser_INSTALL_CMAKE_DIR}>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:${graphql-parser_INSTALL_CMAKE_DIR}>
+)
+#target_include_directories(graphql-parser PUBLIC
+#        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+#        $<INSTALL_INTERFACE:${graphql-parser_INSTALL_CMAKE_DIR}>
+#        )
+#target_link_libraries(graphql-parser INTERFACE
+#        graphql-parser-base::graphql-parser-base
+#        )
+target_link_libraries(graphql-parser INTERFACE
+        graphql-parser-base::graphql-parser-base
         )
-target_link_libraries(graphql-parser INTERFACE graphql-parser-base::graphql-parser-base)
 
-## require C++20
-#set_property(TARGET graphql-parser PROPERTY CXX_STANDARD 20)
+# require C++20
+set_property(TARGET graphql-parser PROPERTY INTERFACE_CXX_STANDARD 20)
 
 # Make package findable
 configure_file(cmake/dummy-config.cmake.in graphql-parser-config.cmake @ONLY)
@@ -48,7 +61,7 @@ install(DIRECTORY include/ DESTINATION ${graphql-parser_INSTALL_INCLUDE_DIR})
 
 
 # testing
-option(GRAPHQL_PARSER_BUILD_TESTS "Build graphql-parser tests." ON)
+option(GRAPHQL_PARSER_BUILD_TESTS "Build graphql-parser tests." OFF)
 if (GRAPHQL_PARSER_BUILD_TESTS)
     enable_testing()
     add_subdirectory(tests)

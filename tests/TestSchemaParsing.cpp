@@ -1,4 +1,4 @@
-#include "Dice/graphql-parser/GraphQlParser.hpp"
+#include "Dice/graphql-parser/GraphQLParser.hpp"
 
 namespace Dice::graphql_parser::tests::schema {
 
