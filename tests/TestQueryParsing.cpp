@@ -8,7 +8,7 @@ namespace Dice::graphql_parser::tests::schema {
 
 	protected:
 		std::string query = "{"
-							"  people {"
+							"  people(age: 25) {"
 							"    name"
 							"    age"
 							"    company {"
@@ -23,10 +23,10 @@ namespace Dice::graphql_parser::tests::schema {
 		auto parsed_query = GraphQLParser::parseQuery(query);
 		assert(parsed_query->all_result_labels.size() == 1);
 		assert(parsed_query->all_operands_labels.size() == 1);
-		assert(parsed_query->all_fields_names.size() == 1);
+		assert(parsed_query->all_fields_name_arguments.size() == 1);
         assert(parsed_query->all_result_labels[0].size() == 3);
-        assert(parsed_query->all_operands_labels[0].size() == 13);
-		assert(parsed_query->all_fields_names[0].size() == 5);
+        assert(parsed_query->all_operands_labels[0].size() == 14);
+		assert(parsed_query->all_fields_name_arguments[0].size() == 6);
 	}
 
 }
