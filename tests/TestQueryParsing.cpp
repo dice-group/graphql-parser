@@ -24,7 +24,7 @@ namespace Dice::graphql_parser::tests::schema {
 		assert(parsed_query->all_result_labels.size() == 1);
 		assert(parsed_query->all_operands_labels.size() == 1);
 		assert(parsed_query->all_fields_name_arguments.size() == 1);
-        assert(parsed_query->all_result_labels[0].size() == 3);
+        assert(parsed_query->all_result_labels[0].size() == 5);
         assert(parsed_query->all_operands_labels[0].size() == 14);
 		assert(parsed_query->all_fields_name_arguments[0].size() == 6);
 	}

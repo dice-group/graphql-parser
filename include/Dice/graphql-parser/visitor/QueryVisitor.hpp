@@ -40,7 +40,7 @@ namespace Dice::graphql_parser::visitor {
 		Path active_path{};
 		// active subscript label
 		char next_label = 'a';
-		// subscript label of last visted field
+		// subscript label of last visited field
 		char field_label;
 		// stack - subscript label of last visited selection set
 		std::vector<char> selection_set_label{};
@@ -56,6 +56,7 @@ namespace Dice::graphql_parser::visitor {
                 parsed_query->all_operands_labels.emplace_back(OperandsLabels());
                 parsed_query->all_operands_labels.back().emplace_back(OperandLabels{field_label});
                 parsed_query->all_result_labels.emplace_back(ResultsLabels());
+				parsed_query->all_result_labels.back().push_back(field_label);
                 parsed_query->all_fields_name_arguments.emplace_back(FieldsNameArguments());
                 parsed_query->all_fields_name_arguments.back().emplace_back(FieldName(root_field->field()->name()->getText()));
 				parsed_query->all_paths.emplace_back(Paths());
@@ -85,12 +86,12 @@ namespace Dice::graphql_parser::visitor {
 			// beginning of optional part
             parsed_query->all_operands_labels.back().emplace_back(OperandLabels{'['});
             parsed_query->all_operands_labels.back().emplace_back(OperandLabels{selection_set_label.back(), field_label});
+			// the labels of all fields will go into the result labels
+            parsed_query->all_result_labels.back().push_back(field_label);
             parsed_query->all_fields_name_arguments.back().emplace_back(FieldName(field_name));
-			// leaf field - add result label
-			if(not ctx->selectionSet()) {
-				parsed_query->all_result_labels.back().push_back(field_label);
+			// leaf field - we reached the end of the path
+			if(not ctx->selectionSet())
 				parsed_query->all_paths.back().emplace_back(active_path);
-			}
 			else {
 				// visit arguments
 				if(ctx->arguments())

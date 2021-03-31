@@ -4,7 +4,6 @@
 #include <GraphQL/GraphQLLexer.h>
 
 #include "Dice/graphql-parser/visitor/SchemaVisitor.hpp"
-#include "Dice/graphql-parser/visitor/ResponseVisitor.hpp"
 #include "Dice/graphql-parser/visitor/QueryVisitor.hpp"
 
 
