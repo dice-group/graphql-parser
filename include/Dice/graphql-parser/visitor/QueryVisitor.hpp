@@ -31,6 +31,8 @@ namespace Dice::graphql_parser::visitor {
             std::vector<FieldsNameArguments> all_fields_name_arguments{};
 			// list of paths
 			std::vector<Paths> all_paths{};
+			// the labels that appear in inline fragments
+			std::vector<std::set<char>> all_fragment_labels{};
         };
 
 	private:
@@ -44,6 +46,8 @@ namespace Dice::graphql_parser::visitor {
 		char field_label;
 		// stack - subscript label of last visited selection set
 		std::vector<char> selection_set_label{};
+		// used to store fragment labels
+		bool in_fragment = false;
 
 	public:
 
@@ -60,27 +64,36 @@ namespace Dice::graphql_parser::visitor {
                 parsed_query->all_fields_name_arguments.emplace_back(FieldsNameArguments());
                 parsed_query->all_fields_name_arguments.back().emplace_back(FieldName(root_field->field()->name()->getText()));
 				parsed_query->all_paths.emplace_back(Paths());
+				parsed_query->all_fragment_labels.emplace_back(std::set<char>());
 				// parse arguments of root field
 				if(root_field->field()->arguments())
 					visitArguments(root_field->field()->arguments());
+				selection_set_label.push_back(field_label);
 				if(root_field->field()->selectionSet())
 					visitSelectionSet(root_field->field()->selectionSet());
+				selection_set_label.pop_back();
+				// reset
+				next_label = 'a';
+				active_path.clear();
+				in_fragment = false;
 			}
             return parsed_query;
 		}
 
 		antlrcpp::Any visitSelectionSet(base::GraphQLParser::SelectionSetContext *ctx) override {
-			selection_set_label.push_back(next_label);
 			for(const auto &selection : ctx->selection()) {
 				if(selection->field())
 					visitField(selection->field());
+				else if(selection->inlineFragment())
+					visitInlineFragment(selection->inlineFragment());
 			}
-			selection_set_label.pop_back();
             return nullptr;
 		}
 
 		antlrcpp::Any visitField(base::GraphQLParser::FieldContext *ctx) override {
 			field_label = ++next_label;
+			if (in_fragment)
+				parsed_query->all_fragment_labels.back().insert(field_label);
 			const auto &field_name = ctx->name()->getText();
 			active_path.push_back({field_label, field_name});
 			// beginning of optional part
@@ -93,16 +106,33 @@ namespace Dice::graphql_parser::visitor {
 			if(not ctx->selectionSet())
 				parsed_query->all_paths.back().emplace_back(active_path);
 			else {
+				in_fragment = false;
 				// visit arguments
 				if(ctx->arguments())
 					visitArguments(ctx->arguments());
 				// visit nested fields
+                selection_set_label.push_back(field_label);
 				visitSelectionSet(ctx->selectionSet());
+                selection_set_label.pop_back();
 			}
 			// end of optional part
             parsed_query->all_operands_labels.back().emplace_back(OperandLabels{']'});
 			// remove field name from path
 			active_path.pop_back();
+			return nullptr;
+		}
+
+		antlrcpp::Any visitInlineFragment(base::GraphQLParser::InlineFragmentContext *ctx) override {
+			if (ctx->typeCondition()) {
+				parsed_query->all_fields_name_arguments.back().push_back(ctx->typeCondition()->namedType()->name()->getText());
+				// the inline fragment adds an additional optional layer
+				parsed_query->all_operands_labels.back().emplace_back(OperandLabels{'['});
+				parsed_query->all_operands_labels.back().emplace_back(OperandLabels{selection_set_label.back()});
+				in_fragment = true;
+				visitSelectionSet(ctx->selectionSet());
+                // close the optional layer of the inline fragment
+                parsed_query->all_operands_labels.back().emplace_back(OperandLabels{']'});
+			}
 			return nullptr;
 		}
 
@@ -121,7 +151,7 @@ namespace Dice::graphql_parser::visitor {
 				else if(arg->value()->booleanValue())
 					value = arg->value()->booleanValue()->getText() == "true";
 				else
-					throw std::runtime_error("Non scalar values for arguments are not supported");
+					throw std::invalid_argument("Non scalar values for arguments are not supported");
                 parsed_query->all_fields_name_arguments.back().emplace_back(Argument(name, value));
 			}
 			return nullptr;
